@@ -1,4 +1,4 @@
-/*! dm-experience.js v1.0.0 | Dearing & Muse site experience layer | Origin
+/*! dm-experience.js v1.0.1 | Dearing & Muse site experience layer | Origin
  *  Loaded site-wide from the Webflow footer custom code (jsDelivr @commit + SRI).
  *  Modules: 1 loader, 2 home showroom rotation, 3 nav shade, 4 arrow scrollers.
  *  Every module checks prefers-reduced-motion and degrades to the end state.
@@ -7,7 +7,7 @@
 (function () {
   'use strict';
   if (window.__dmExperience) return;
-  window.__dmExperience = '1.0.0';
+  window.__dmExperience = '1.0.1';
 
   var EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -243,6 +243,8 @@
         var max = track.scrollWidth - track.clientWidth;
         target = Math.max(0, Math.min(max, target));
         if (REDUCED) { track.scrollLeft = target; ends(); return; }
+        // Background tabs get no animation frames; let the browser ease instead.
+        if (document.hidden) { track.scrollTo({ left: target, behavior: 'smooth' }); setTimeout(ends, 700); return; }
         var from = track.scrollLeft, delta = target - from, t0 = null, D = 600;
         track.style.scrollSnapType = 'none';
         function frame(ts) {
