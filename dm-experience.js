@@ -1,4 +1,4 @@
-/*! dm-experience.js v1.3.0 | Dearing & Muse site experience layer | Origin
+/*! dm-experience.js v1.4.0 | Dearing & Muse site experience layer | Origin
  *  Loaded site-wide from the Webflow footer custom code (jsDelivr @commit + SRI).
  *  Modules: 1 loader, 2 home showroom rotation, 3 nav shade, 4 arrow scrollers (+ cursor arrow on
  *  the Showroom category row), 5 nav drop-in + card hover.
@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   if (window.__dmExperience) return;
-  window.__dmExperience = '1.3.0';
+  window.__dmExperience = '1.4.0';
 
   var EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -42,7 +42,10 @@
     shade: { opacity: 0.35, inMs: 300, outMs: 200 },
     scrollers: [
       { arrows: '.sr-cats-arrows',    track: '.sr-cards',         item: '.sr-card', cursor: true },
-      { arrows: '.cm-journal-arrows', track: '.cm-journal-items', item: '.w-dyn-item' }
+      { arrows: '.cm-journal-arrows', track: '.cm-journal-items', item: '.w-dyn-item' },
+      // Event lists (Showroom + Community): one card per event, scrolling sideways.
+      { arrows: '.sr-events .events-arrows', track: '.sr-events .event-list .w-dyn-items', item: '.w-dyn-item' },
+      { arrows: '.cm-events .events-arrows', track: '.cm-events .event-list .w-dyn-items', item: '.w-dyn-item' }
     ]
   };
 
@@ -222,7 +225,14 @@
         '.dm-arrow:not(.is-end):hover{transform:translateX(var(--dm-nudge,0))}' +
         '.sr-cards::-webkit-scrollbar,.cm-journal-items::-webkit-scrollbar{display:none}' +
         '.cm-journal-items .w-dyn-item{flex:0 0 calc((100% - 30px) / 3);scroll-snap-align:start}' +
-        '@media (max-width:767px){.cm-journal-items .w-dyn-item{flex-basis:78%}}');
+        '@media (max-width:767px){.cm-journal-items .w-dyn-item{flex-basis:78%}}' +
+        // Event track: same rhythm as the journal row (3 up, 2 on tablet, 78% on phones).
+        '.event-list .w-dyn-items{display:flex;column-gap:15px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}' +
+        '.event-list .w-dyn-items::-webkit-scrollbar{display:none}' +
+        '.event-list .w-dyn-item{flex:0 0 calc((100% - 30px) / 3);scroll-snap-align:start;display:flex}' +
+        '.event-list .w-dyn-item > .event-item{flex:1 1 auto}' +
+        '@media (max-width:991px){.event-list .w-dyn-item{flex-basis:calc((100% - 15px) / 2)}}' +
+        '@media (max-width:767px){.event-list .w-dyn-item{flex-basis:78%}}');
     CONFIG.scrollers.forEach(function (s) {
       var arrows = document.querySelector(s.arrows);
       var track = document.querySelector(s.track);
