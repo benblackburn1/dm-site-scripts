@@ -1,4 +1,4 @@
-/*! dm-experience.js v1.1.0 | Dearing & Muse site experience layer | Origin
+/*! dm-experience.js v1.2.0 | Dearing & Muse site experience layer | Origin
  *  Loaded site-wide from the Webflow footer custom code (jsDelivr @commit + SRI).
  *  Modules: 1 loader, 2 home showroom rotation, 3 nav shade, 4 arrow scrollers, 5 nav drop-in + card hover.
  *  Every module checks prefers-reduced-motion and degrades to the end state.
@@ -7,7 +7,7 @@
 (function () {
   'use strict';
   if (window.__dmExperience) return;
-  window.__dmExperience = '1.1.0';
+  window.__dmExperience = '1.2.0';
 
   var EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -15,8 +15,14 @@
 
   var CONFIG = {
     loader: {
-      // Fill from Website/Content/DM_Load once uploaded as Webflow assets. First entry = cover.
-      images: [],
+      // Webflow asset folder "DM Load", 1600px variants. First entry = cover.
+      images: [
+        CDN + '6ac6675cf7d423fcd4301099_DM_Cover-p-1600.jpg',
+        CDN + '6ac6675c72f7176401c40853_Frame-p-1600.jpg',
+        CDN + '6ac6675cef861998c06c594a_DM.V2-62%201-p-1600.jpg',
+        CDN + '6ac6675c381aed4c54a762ca_DM.V2-32%201-p-1600.jpg',
+        CDN + '6ac6675c010edce966923113_DM.V2-44%201-p-1600.jpg'
+      ],
       interval: 1000,       // ms per image, hard cut
       exit: 700,            // ms wipe
       sessionKey: 'dm-loaded'
