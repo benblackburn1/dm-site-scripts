@@ -1,13 +1,14 @@
-/*! dm-experience.js v1.2.0 | Dearing & Muse site experience layer | Origin
+/*! dm-experience.js v1.3.0 | Dearing & Muse site experience layer | Origin
  *  Loaded site-wide from the Webflow footer custom code (jsDelivr @commit + SRI).
- *  Modules: 1 loader, 2 home showroom rotation, 3 nav shade, 4 arrow scrollers, 5 nav drop-in + card hover.
+ *  Modules: 1 loader, 2 home showroom rotation, 3 nav shade, 4 arrow scrollers (+ cursor arrow on
+ *  the Showroom category row), 5 nav drop-in + card hover.
  *  Every module checks prefers-reduced-motion and degrades to the end state.
  *  Styling it injects stays minimal and uses the site's own variables.
  */
 (function () {
   'use strict';
   if (window.__dmExperience) return;
-  window.__dmExperience = '1.2.0';
+  window.__dmExperience = '1.3.0';
 
   var EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -40,7 +41,7 @@
     },
     shade: { opacity: 0.35, inMs: 300, outMs: 200 },
     scrollers: [
-      { arrows: '.sr-cats-arrows',    track: '.sr-cards',         item: '.sr-card' },
+      { arrows: '.sr-cats-arrows',    track: '.sr-cards',         item: '.sr-card', cursor: true },
       { arrows: '.cm-journal-arrows', track: '.cm-journal-items', item: '.w-dyn-item' }
     ]
   };
@@ -269,6 +270,46 @@
       track.addEventListener('scroll', ends, { passive: true });
       window.addEventListener('resize', ends);
       ends();
+      if (s.cursor) cursorArrow(track, prev, next);
+    });
+  }
+
+  // Over the row, the pointer becomes a green arrow: right half of the screen points
+  // right, left half points left, and a click moves the row like the arrow buttons.
+  // Mouse and trackpad only; touch keeps native swipe scrolling.
+  function cursorArrow(track, prev, next) {
+    if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    var T = REDUCED ? 0 : 300;
+    css('.dm-cursor-zone,.dm-cursor-zone *{cursor:none!important}' +
+        '.dm-cursor{position:fixed;left:0;top:0;width:44px;height:44px;margin:-22px 0 0 -22px;pointer-events:none;z-index:1000;' +
+          'color:var(--_dearing-brand---color--pistachio-green,#a3b58b);opacity:0;transition:opacity ' + (T ? 200 : 0) + 'ms ' + EASE + '}' +
+        '.dm-cursor.is-on{opacity:1}.dm-cursor.is-on.is-end{opacity:.35}' +
+        '.dm-cursor svg{display:block;width:100%;height:100%;transform:scale(.6);transition:transform ' + T + 'ms ' + EASE + '}' +
+        '.dm-cursor.is-on svg{transform:scale(1)}.dm-cursor.is-on.is-left svg{transform:scale(1) rotate(180deg)}' +
+        '.dm-cursor.is-on.is-press svg{transform:scale(.85)}.dm-cursor.is-on.is-left.is-press svg{transform:scale(.85) rotate(180deg)}');
+    var el = document.createElement('div');
+    el.className = 'dm-cursor';
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M8 22h28M26 12l10 10-10 10"/></svg>';
+    document.body.appendChild(el);
+    track.classList.add('dm-cursor-zone');
+    var left = false, x = -100, y = -100;
+    function place() {
+      el.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
+      left = x < window.innerWidth / 2;
+      el.classList.toggle('is-left', left);
+      el.classList.toggle('is-end', (left ? prev : next).classList.contains('is-end'));
+    }
+    track.addEventListener('pointermove', function (e) { if (e.pointerType !== 'mouse') return; x = e.clientX; y = e.clientY; place(); el.classList.add('is-on'); });
+    track.addEventListener('pointerleave', function () { el.classList.remove('is-on', 'is-press'); });
+    track.addEventListener('pointerdown', function (e) { if (e.pointerType === 'mouse') el.classList.add('is-press'); });
+    window.addEventListener('pointerup', function () { el.classList.remove('is-press'); });
+    track.addEventListener('scroll', function () { if (el.classList.contains('is-on')) place(); }, { passive: true });
+    track.addEventListener('click', function (e) {
+      if (e.pointerType && e.pointerType !== 'mouse') return;
+      (left ? prev : next).click();
+      setTimeout(place, 750);
     });
   }
 
