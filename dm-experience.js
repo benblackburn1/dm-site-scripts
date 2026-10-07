@@ -1,13 +1,13 @@
-/*! dm-experience.js v1.0.1 | Dearing & Muse site experience layer | Origin
+/*! dm-experience.js v1.1.0 | Dearing & Muse site experience layer | Origin
  *  Loaded site-wide from the Webflow footer custom code (jsDelivr @commit + SRI).
- *  Modules: 1 loader, 2 home showroom rotation, 3 nav shade, 4 arrow scrollers.
+ *  Modules: 1 loader, 2 home showroom rotation, 3 nav shade, 4 arrow scrollers, 5 nav drop-in + card hover.
  *  Every module checks prefers-reduced-motion and degrades to the end state.
  *  Styling it injects stays minimal and uses the site's own variables.
  */
 (function () {
   'use strict';
   if (window.__dmExperience) return;
-  window.__dmExperience = '1.0.1';
+  window.__dmExperience = '1.1.0';
 
   var EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -266,10 +266,28 @@
     });
   }
 
+
+  /* --------------------------------------- 5. Nav drop-in + card image hover */
+  function smallMotion() {
+    if (REDUCED) return;
+    css('@keyframes dmDrop{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}' +
+        '.nav .w-dropdown-list.w--open .nav-dd-link,.nav .w-dropdown-list.w--open a{animation:dmDrop 300ms ' + EASE + ' both}' +
+        '.nav .w-dropdown-list.w--open a:nth-child(2){animation-delay:60ms}' +
+        '.nav .w-dropdown-list.w--open a:nth-child(3){animation-delay:120ms}' +
+        '.nav .w-dropdown-list.w--open a:nth-child(4){animation-delay:180ms}' +
+        '.nav .w-dropdown-list.w--open a:nth-child(5){animation-delay:240ms}' +
+        '@media (hover:hover){' +
+          '.post-card .img-cover,.line-card .img-cover,.ct-card .img-cover,.sr-card .img-cover{transition:transform 600ms ' + EASE + '}' +
+          '.post-card:hover .img-cover,.line-card:hover .img-cover,.ct-card:hover .img-cover,.sr-card:hover .img-cover{transform:scale(1.03)}' +
+          '.post-card-media,.sr-card-media{overflow:hidden}' +
+        '}');
+  }
+
   loader();
   onReady(function () {
     showroom();
     navShade();
     scrollers();
+    smallMotion();
   });
 })();
