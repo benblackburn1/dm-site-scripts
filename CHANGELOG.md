@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.0 (2026-10-12)
+- Showroom category row: the arrow buttons and the arrow cursor are gone. The cursor turned every click on the row into a scroll, so visitors could not click a card. On desktop all six cards now fit in one row (Webflow styles); tablets and phones keep swipe scrolling.
+- Event RSVP: clicking "RSVP" on any event (Showroom and Community) opens the new RSVP Modal component with the event name and date filled in, instead of opening an email. Closes on Close, the backdrop or Escape.
+
 ## v1.4.0 (2026-10-07)
 - Event lists on the Showroom and Community pages scroll sideways: one card per event, three to a screen on desktop, two on tablet, one and a bit on phones, with the same arrow buttons as the journal row. Arrows live in a `.events-arrows` element in each events section.
 
