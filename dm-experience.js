@@ -1,6 +1,6 @@
-/*! dm-experience.js v1.6.0 | Dearing & Muse site experience layer | Origin
+/*! dm-experience.js v1.7.0 | Dearing & Muse site experience layer | Origin
  *  Loaded site-wide from the Webflow footer custom code (jsDelivr @commit + SRI).
- *  Modules: 1 loader, 2 home showroom rotation, 3 nav panel + shade, 4 arrow scrollers, 5 nav drop-in +
+ *  Modules: 1 loader, 2 home showroom rotation, 3 nav panel + shade + hover, 4 arrow scrollers, 5 nav drop-in +
  *  card hover, 6 event RSVP modal.
  *  Every module checks prefers-reduced-motion and degrades to the end state.
  *  Styling it injects stays minimal and uses the site's own variables.
@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   if (window.__dmExperience) return;
-  window.__dmExperience = '1.6.0';
+  window.__dmExperience = '1.7.0';
 
   var EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -39,7 +39,7 @@
       // Finsweet showquery format, read off a real filter click on staging. {value} is replaced.
       linkTemplate: '/represented-lines?category={value}'
     },
-    shade: { opacity: 0.35, inMs: 300, outMs: 200, panelMs: 600, panelPad: 14 },
+    shade: { opacity: 0.35, inMs: 300, outMs: 200, panelMs: 600, panelPad: 14, leaveMs: 200 },
     scrollers: [
       { arrows: '.cm-journal-arrows', track: '.cm-journal-items', item: '.w-dyn-item' },
       // Event lists (Showroom + Community): one card per event, scrolling sideways.
@@ -208,7 +208,7 @@
         '.announce-bar{position:relative;z-index:950}' +
         // Sits over the nav's own bottom rule (top:100% = the padding box edge) and carries the
         // same background and rule, so growing it reads as the bar's edge moving down.
-        '.dm-nav-panel{position:absolute;left:0;right:0;top:100%;height:0;background-color:inherit;border-bottom:1px solid;border-bottom-color:inherit;pointer-events:none;z-index:0;transition:height ' + ms + 'ms ' + EASE + '}' +
+        '.dm-nav-panel{position:absolute;left:0;right:0;top:100%;height:0;background-color:inherit;border-bottom:1px solid;border-bottom-color:inherit;z-index:0;transition:height ' + ms + 'ms ' + EASE + '}' +
         '.nav.dm-nav-open.dm-nav-clear{background-color:var(--_dearing-brand---color--longleaf-green,#24322b)}');
     var panel = document.createElement('div');
     panel.className = 'dm-nav-panel';
@@ -223,18 +223,54 @@
       var dd = toggle && toggle.closest('.w-dropdown');
       var list = dd && !dd.classList.contains('nav-dd-mobile') ? dd.querySelector('.w-dropdown-list.w--open') : null;
       var r = nav.getBoundingClientRect();
+      var bw = parseFloat(getComputedStyle(nav).borderBottomWidth) || 0;
       var height = list ? Math.max(0, Math.round(list.getBoundingClientRect().bottom - r.bottom + cfg.panelPad)) : 0;
       nav.classList.toggle('dm-nav-open', !!toggle);
       panel.style.height = height + 'px';
       shade.classList.toggle('is-on', !!toggle);
-      // Keep the shade under the bar and its panel.
-      shade.style.top = Math.max(0, r.bottom + height) + 'px';
+      // Keep the shade under the bar and its panel. The panel starts on the bar's own rule
+      // (top:100% is the padding-box edge) and its height includes its rule, so its bottom is
+      // r.bottom - bw + height; start the shade 2px above that, hidden under the panel, so no
+      // sub-pixel seam shows between the rule and the dimmed page.
+      shade.style.top = Math.max(0, Math.floor(r.bottom - bw + height) - 2) + 'px';
     }
     var mo = new MutationObserver(sync);
     mo.observe(nav, { attributes: true, subtree: true, attributeFilter: ['class'] });
     window.addEventListener('scroll', function () { if (shade.classList.contains('is-on')) sync(); }, { passive: true });
     window.addEventListener('resize', function () { if (shade.classList.contains('is-on')) sync(); });
     // A click on the shade is an outside click, which Webflow uses to close the dropdown.
+
+    // Hover (mouse and trackpad only): a dropdown opens when its toggle is hovered and stays
+    // open while the cursor is anywhere on the bar or its panel; it closes only when the cursor
+    // leaves the whole grown bar. Webflow's own hover mode would close it on leaving the
+    // dropdown wrapper, so the dropdowns stay in click mode and are driven here through the
+    // events Webflow listens to: mouseup on the toggle opens (and closes the other dropdown),
+    // and w-close on the wrapper closes. Touch devices keep tap to open.
+    if (!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches)) return;
+    var dds = [].slice.call(nav.querySelectorAll('.nav-dd.w-dropdown:not(.nav-dd-mobile)'));
+    var leaveTimer = 0;
+    function isOpen(dd) { return !!dd.querySelector('.w-dropdown-toggle.w--open'); }
+    function press(el) {
+      ['mousedown', 'mouseup'].forEach(function (type) {
+        el.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, button: 0 }));
+      });
+    }
+    function closeAll() {
+      dds.forEach(function (dd) { if (isOpen(dd)) dd.dispatchEvent(new Event('w-close')); });
+    }
+    dds.forEach(function (dd) {
+      var t = dd.querySelector('.w-dropdown-toggle');
+      if (!t) return;
+      t.addEventListener('mouseenter', function () {
+        clearTimeout(leaveTimer);
+        if (!isOpen(dd)) press(t);
+      });
+    });
+    nav.addEventListener('mouseenter', function () { clearTimeout(leaveTimer); });
+    nav.addEventListener('mouseleave', function () {
+      clearTimeout(leaveTimer);
+      leaveTimer = setTimeout(function () { if (!nav.matches(':hover')) closeAll(); }, cfg.leaveMs);
+    });
   }
 
   /* ------------------------------------------------------ 4. Arrow scrollers */

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.7.0 (2026-10-13)
+- Nav dropdowns: hover is now handled by the script, not Webflow. A dropdown opens when its label is hovered and stays open while the cursor is anywhere on the bar or its extended panel; it closes only when the cursor leaves the whole bar (200ms grace). Webflow's hover mode closed it as soon as the cursor left the label and its list. Clicking and tapping still work.
+- Nav panel: the dimmed page now starts under the panel's rule, closing the 1 to 2px seam that showed between the line and the dark overlay.
+
 ## v1.6.0 (2026-10-13)
 - Nav dropdowns: when For Designers or Information opens, the bar's lower edge (its background and bottom rule) eases down under the links, so they sit on the nav colour while the page below is dimmed. On the Home page, where the nav is transparent, the bar turns Longleaf while a dropdown is open. The mobile Menu list is unchanged.
 
