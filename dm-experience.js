@@ -1,6 +1,6 @@
-/*! dm-experience.js v1.5.0 | Dearing & Muse site experience layer | Origin
+/*! dm-experience.js v1.6.0 | Dearing & Muse site experience layer | Origin
  *  Loaded site-wide from the Webflow footer custom code (jsDelivr @commit + SRI).
- *  Modules: 1 loader, 2 home showroom rotation, 3 nav shade, 4 arrow scrollers, 5 nav drop-in +
+ *  Modules: 1 loader, 2 home showroom rotation, 3 nav panel + shade, 4 arrow scrollers, 5 nav drop-in +
  *  card hover, 6 event RSVP modal.
  *  Every module checks prefers-reduced-motion and degrades to the end state.
  *  Styling it injects stays minimal and uses the site's own variables.
@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   if (window.__dmExperience) return;
-  window.__dmExperience = '1.5.0';
+  window.__dmExperience = '1.6.0';
 
   var EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -39,7 +39,7 @@
       // Finsweet showquery format, read off a real filter click on staging. {value} is replaced.
       linkTemplate: '/represented-lines?category={value}'
     },
-    shade: { opacity: 0.35, inMs: 300, outMs: 200 },
+    shade: { opacity: 0.35, inMs: 300, outMs: 200, panelMs: 600, panelPad: 14 },
     scrollers: [
       { arrows: '.cm-journal-arrows', track: '.cm-journal-items', item: '.w-dyn-item' },
       // Event lists (Showroom + Community): one card per event, scrolling sideways.
@@ -192,28 +192,48 @@
     restart();
   }
 
-  /* ----------------------------------------------------------- 3. Nav shade */
+  /* ---------------------------------------------------- 3. Nav panel + shade */
+  // When a desktop dropdown opens, the bar's lower edge (its background and bottom rule) eases
+  // down under the open links, so they sit on the nav colour, and the page below is dimmed.
+  // The mobile Menu keeps its own full-width list. Home's transparent nav turns Longleaf while
+  // open so ivory links read on it.
   function navShade() {
     var nav = document.querySelector('.nav');
     if (!nav) return;
     var cfg = CONFIG.shade;
-    css('.dm-shade{position:fixed;left:0;right:0;bottom:0;top:0;background:#000;opacity:0;pointer-events:none;z-index:900;transition:opacity ' + cfg.outMs + 'ms ease}' +
-        '.dm-shade.is-on{opacity:' + cfg.opacity + ';pointer-events:auto;transition-duration:' + cfg.inMs + 'ms}' +
-        '.nav{position:relative;z-index:950}' +
-        '.announce-bar{position:relative;z-index:950}');
+    var ms = REDUCED ? 0 : cfg.panelMs;
+    css('.dm-shade{position:fixed;left:0;right:0;bottom:0;top:0;background:#000;opacity:0;pointer-events:none;z-index:900;transition:opacity ' + cfg.outMs + 'ms ease,top ' + ms + 'ms ' + EASE + '}' +
+        '.dm-shade.is-on{opacity:' + cfg.opacity + ';pointer-events:auto;transition-duration:' + cfg.inMs + 'ms,' + ms + 'ms}' +
+        '.nav{position:relative;z-index:950;transition:background-color ' + ms + 'ms ' + EASE + '}' +
+        '.announce-bar{position:relative;z-index:950}' +
+        // Sits over the nav's own bottom rule (top:100% = the padding box edge) and carries the
+        // same background and rule, so growing it reads as the bar's edge moving down.
+        '.dm-nav-panel{position:absolute;left:0;right:0;top:100%;height:0;background-color:inherit;border-bottom:1px solid;border-bottom-color:inherit;pointer-events:none;z-index:0;transition:height ' + ms + 'ms ' + EASE + '}' +
+        '.nav.dm-nav-open.dm-nav-clear{background-color:var(--_dearing-brand---color--longleaf-green,#24322b)}');
+    var panel = document.createElement('div');
+    panel.className = 'dm-nav-panel';
+    panel.setAttribute('aria-hidden', 'true');
+    nav.appendChild(panel);
     var shade = document.createElement('div');
     shade.className = 'dm-shade';
     document.body.appendChild(shade);
+    if (/^(transparent|rgba\([^)]*,\s*0\s*\))$/.test(getComputedStyle(nav).backgroundColor)) nav.classList.add('dm-nav-clear');
     function sync() {
-      var open = nav.querySelector('.w-dropdown-toggle.w--open');
-      shade.classList.toggle('is-on', !!open);
-      // Keep the shade under the bar: start it at the bottom edge of the nav.
+      var toggle = nav.querySelector('.w-dropdown-toggle.w--open');
+      var dd = toggle && toggle.closest('.w-dropdown');
+      var list = dd && !dd.classList.contains('nav-dd-mobile') ? dd.querySelector('.w-dropdown-list.w--open') : null;
       var r = nav.getBoundingClientRect();
-      shade.style.top = Math.max(0, r.bottom) + 'px';
+      var height = list ? Math.max(0, Math.round(list.getBoundingClientRect().bottom - r.bottom + cfg.panelPad)) : 0;
+      nav.classList.toggle('dm-nav-open', !!toggle);
+      panel.style.height = height + 'px';
+      shade.classList.toggle('is-on', !!toggle);
+      // Keep the shade under the bar and its panel.
+      shade.style.top = Math.max(0, r.bottom + height) + 'px';
     }
     var mo = new MutationObserver(sync);
     mo.observe(nav, { attributes: true, subtree: true, attributeFilter: ['class'] });
     window.addEventListener('scroll', function () { if (shade.classList.contains('is-on')) sync(); }, { passive: true });
+    window.addEventListener('resize', function () { if (shade.classList.contains('is-on')) sync(); });
     // A click on the shade is an outside click, which Webflow uses to close the dropdown.
   }
 

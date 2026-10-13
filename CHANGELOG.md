@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.6.0 (2026-10-13)
+- Nav dropdowns: when For Designers or Information opens, the bar's lower edge (its background and bottom rule) eases down under the links, so they sit on the nav colour while the page below is dimmed. On the Home page, where the nav is transparent, the bar turns Longleaf while a dropdown is open. The mobile Menu list is unchanged.
+
 ## v1.5.0 (2026-10-12)
 - Showroom category row: the arrow buttons and the arrow cursor are gone. The cursor turned every click on the row into a scroll, so visitors could not click a card. On desktop all six cards now fit in one row (Webflow styles); tablets and phones keep swipe scrolling.
 - Event RSVP: clicking "RSVP" on any event (Showroom and Community) opens the new RSVP Modal component with the event name and date filled in, instead of opening an email. Closes on Close, the backdrop or Escape.
