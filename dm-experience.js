@@ -1,14 +1,14 @@
-/*! dm-experience.js v1.7.0 | Dearing & Muse site experience layer | Origin
+/*! dm-experience.js v1.8.0 | Dearing & Muse site experience layer | Origin
  *  Loaded site-wide from the Webflow footer custom code (jsDelivr @commit + SRI).
  *  Modules: 1 loader, 2 home showroom rotation, 3 nav panel + shade + hover, 4 arrow scrollers, 5 nav drop-in +
- *  card hover, 6 event RSVP modal.
+ *  card hover, 6 event RSVP modal, 7 button inversion.
  *  Every module checks prefers-reduced-motion and degrades to the end state.
  *  Styling it injects stays minimal and uses the site's own variables.
  */
 (function () {
   'use strict';
   if (window.__dmExperience) return;
-  window.__dmExperience = '1.7.0';
+  window.__dmExperience = '1.8.0';
 
   var EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -402,6 +402,33 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.style.display === 'flex') close(); });
   }
 
+  /* ------------------------------------------------------- 7. Button inversion */
+  // Buttons reverse on hover against the surface they sit on: an outlined button fills with the
+  // surface's ink colour and its text takes the surface colour; a solid (Boxwood) button empties
+  // to the surface colour with Boxwood text and rule. Each section class declares its ink and
+  // surface here; nested elements inherit them, so a button anywhere inside a section is covered.
+  // The Home hero sits on a photo, so it borrows Longleaf as its surface.
+  function buttons() {
+    var C = 'var(--_dearing-brand---color--';
+    var ivory = C + 'ivory)', fog = C + 'fog-green)', boxwood = C + 'boxwood-green)',
+        longleaf = C + 'longleaf-green)', pistachio = C + 'pistachio-green)', aubergine = C + 'aubrergine)';
+    function surface(sel, ink, bg) { return sel + '{--dm-ink:' + ink + ';--dm-surface:' + bg + '}'; }
+    css(surface(':root', boxwood, ivory) +
+        surface('.sec-ivory', boxwood, ivory) +
+        surface('.sec-ivory-longleaf', longleaf, ivory) +
+        surface('.sec-fog', boxwood, fog) +
+        surface('.sec-fog-longleaf', longleaf, fog) +
+        surface('.sec-pistachio', longleaf, pistachio) +
+        surface('.sec-pistachio-boxwood', boxwood, pistachio) +
+        surface('.sec-longleaf', pistachio, longleaf) +
+        surface('.sec-aubergine', ivory, aubergine) +
+        surface('.footer', ivory, longleaf) +
+        surface('.hero', ivory, longleaf) +
+        surface('.rsvp-panel', longleaf, ivory) +
+        '.btn-outline:hover{background-color:var(--dm-ink);border-color:var(--dm-ink);color:var(--dm-surface)}' +
+        '.btn-solid:hover{background-color:var(--dm-surface);border-color:' + boxwood + ';color:' + boxwood + '}');
+  }
+
   loader();
   onReady(function () {
     showroom();
@@ -409,5 +436,6 @@
     scrollers();
     smallMotion();
     rsvpModal();
+    buttons();
   });
 })();
