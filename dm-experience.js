@@ -13,7 +13,7 @@
   var EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var CDN = 'https://cdn.prod.website-files.com/6ab567aafc549c14eb780d59/';
-
+/*!
   var CONFIG = {
     loader: {
       // Webflow asset folder "DM Load", 1600px variants. First entry = cover.
@@ -28,13 +28,15 @@
       exit: 700,            // ms wipe
       sessionKey: 'dm-loaded'
     },
+     */
+  
     showroom: {
       interval: 3000,
       fade: 600,
       items: [
         { name: 'Textiles',      image: CDN + '6ab58422df6f5d9eeca146b8_DM.V2-3.jpg',   cta: 'Browse textiles',      query: 'Textiles' },
         { name: 'Wallcoverings', image: CDN + '6ab58424df6f5d9eeca1476f_DM.V2-36.jpg',  cta: 'Browse wallcoverings', query: 'Wallcoverings' },
-        { name: 'Furniture',     image: CDN + '6ab584b422cd6c4faae53a20_DM.V2-41.jpg',  cta: 'Browse furniture',     query: 'Furniture' }
+        { name: 'Furniture',     image: CDN + '6ab584b422cd6c4faae53a20_DM.V2-41.avif',  cta: 'Browse furniture',     query: 'Furniture' }
       ],
       // Finsweet showquery format, read off a real filter click on staging. {value} is replaced.
       linkTemplate: '/represented-lines?category={value}'
