@@ -14,7 +14,20 @@
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var CDN = 'https://cdn.prod.website-files.com/6ab567aafc549c14eb780d59/';
 
-  
+    var CONFIG = {
+    loader: {
+      // Webflow asset folder "DM Load", 1600px variants. First entry = cover.
+      images: [
+        CDN + '6ac6675cf7d423fcd4301099_DM_Cover-p-1600.jpg',
+        CDN + '6ac6675c72f7176401c40853_Frame-p-1600.jpg',
+        CDN + '6ab584b59932fa31931dfe3d_DM.V2-62%201-p-1600.avif',
+        CDN + '6ac6675c381aed4c54a762ca_DM.V2-32%201-p-1600.avif',
+        CDN + '6ac6675c010edce966923113_DM.V2-44%201-p-1600.avif'
+      ],
+      interval: 1000,       // ms per image, hard cut
+      exit: 700,            // ms wipe
+      sessionKey: 'dm-loaded'
+    },
     showroom: {
       interval: 3000,
       fade: 600,
