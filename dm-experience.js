@@ -14,20 +14,7 @@
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var CDN = 'https://cdn.prod.website-files.com/6ab567aafc549c14eb780d59/';
 
-    var CONFIG = {
-    loader: {
-      // Webflow asset folder "DM Load", 1600px variants. First entry = cover.
-      images: [
-        CDN + '6ac6675cf7d423fcd4301099_DM_Cover-p-1600.jpg',
-        CDN + '6ac6675c72f7176401c40853_Frame-p-1600.jpg',
-        CDN + '6ab584b59932fa31931dfe3d_DM.V2-62%201-p-1600.avif',
-        CDN + '6ac6675c381aed4c54a762ca_DM.V2-32%201-p-1600.avif',
-        CDN + '6ac6675c010edce966923113_DM.V2-44%201-p-1600.avif'
-      ],
-      interval: 1000,       // ms per image, hard cut
-      exit: 700,            // ms wipe
-      sessionKey: 'dm-loaded'
-    },
+
     showroom: {
       interval: 3000,
       fade: 600,
@@ -59,65 +46,6 @@
     else fn();
   }
 
-  /* ---------------------------------------------------------------- 1. Loader */
-  function loader() {
-    var c = CONFIG.loader;
-    var seen = false;
-    try { seen = !!sessionStorage.getItem(c.sessionKey); } catch (e) {}
-    if (seen || !c.images.length) {
-      var stale = document.querySelector('.dm-loader');
-      if (stale && stale.parentNode) stale.parentNode.removeChild(stale);
-      document.documentElement.classList.remove('dm-loading');
-      return;
-    }
-    try { sessionStorage.setItem(c.sessionKey, '1'); } catch (e) {}
-
-    css('.dm-loader{position:fixed;inset:0;z-index:9999;background:var(--_dearing-brand---color--boxwood-green,#56581a);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform ' + c.exit + 'ms ' + EASE + ',opacity 300ms ease}' +
-        '.dm-loader img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}' +
-        '.dm-loader img.is-on{opacity:1}' +
-        '.dm-loader.is-out{transform:translateY(-100%)}' +
-        '.dm-loader.is-fade{opacity:0}' +
-        'html.dm-loading{overflow:hidden}');
-
-    // The site head paints an empty .dm-loader before first paint; adopt it if present.
-    var wrap = document.querySelector('.dm-loader') || document.createElement('div');
-    wrap.className = 'dm-loader';
-    wrap.setAttribute('aria-hidden', 'true');
-    var imgs = c.images.map(function (src, i) {
-      var im = document.createElement('img');
-      im.src = src; im.alt = ''; im.decoding = 'sync';
-      if (i === 0) im.className = 'is-on';
-      wrap.appendChild(im);
-      return im;
-    });
-    document.documentElement.classList.add('dm-loading');
-    if (!wrap.parentNode) (document.body || document.documentElement).appendChild(wrap);
-
-    var idx = 0, cycled = false, loaded = false, timer;
-    function finish() {
-      clearInterval(timer);
-      wrap.classList.add(REDUCED ? 'is-fade' : 'is-out');
-      document.documentElement.classList.remove('dm-loading');
-      document.dispatchEvent(new CustomEvent('dm:loader-done'));
-      setTimeout(function () { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }, c.exit + 50);
-    }
-    function maybeFinish() { if (cycled && loaded) finish(); }
-
-    if (REDUCED) {
-      setTimeout(function () { cycled = true; maybeFinish(); }, 600);
-    } else {
-      timer = setInterval(function () {
-        imgs[idx].classList.remove('is-on');
-        idx = (idx + 1) % imgs.length;
-        imgs[idx].classList.add('is-on');
-        if (idx === 0) { cycled = true; maybeFinish(); }
-      }, c.interval);
-    }
-    if (document.readyState === 'complete') { loaded = true; }
-    else window.addEventListener('load', function () { loaded = true; maybeFinish(); });
-    // Safety: never hold the page longer than 8s.
-    setTimeout(function () { cycled = true; loaded = true; finish(); }, 8000);
-  }
 
   /* --------------------------------------------- 2. Home showroom rotation */
   function showroom() {
